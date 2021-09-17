@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  server:
+    deploy:
+          resources:
+            reservations:
+              devices:
+              - driver: nvidia
+                device_ids: ['0']
+                capabilities: [gpu]
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    build: server
+    environment:
+      - TZ=Europe/Moscow
+      - MSSQL_SERVER=10.2.4.124
+      - MSSQL_LOGIN=ICECORP\1c_sql
+      - MSSQL_PASSWORD=dpCEoF1e4A6XPOL
