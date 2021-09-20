@@ -8,9 +8,9 @@ import time
 import pymssql
 import os
 
-BATCH_SIZE = 2 # 1000
+BATCH_SIZE = 1000
 
-def update_record(server_object, df):
+def update_record(conn, df):
 
         query = ''
 
@@ -28,9 +28,9 @@ def update_record(server_object, df):
                 query += "where id = "+str(row.id)+";"
                 #print(row.id, row.sentiment)
 
-        cursor = server_object.conn.cursor()
+        cursor = conn.cursor()
         cursor.execute(query)
-        server_object.conn.commit()
+        conn.commit()
 
 
 def connect_sql():
@@ -47,32 +47,32 @@ def main():
 
         conn = connect_sql()
 
-        #model = build_model(configs.classifiers.rusentiment_bert, download=True)
+        model = build_model(configs.classifiers.rusentiment_bert, download=True)
 
         line = 0
-        #while True:
+        while True:
 
-        query = """
-                select top """+str(BATCH_SIZE)+"""
-                id,     text, sentiment
-                from transcribations
-                where sentiment is NULL and text!=''
-                order by transcribation_date, start
-                """
+                query = """
+                        select top """+str(BATCH_SIZE)+"""
+                        id,     text, sentiment
+                        from transcribations
+                        where sentiment is NULL and text!=''
+                        order by transcribation_date, start
+                        """
 
-        df = pd.read_sql(query, conn)
+                df = pd.read_sql(query, conn)
 
-        if len(df) > 0:
-                print('solving '+str(len(df))+' records')        
-                #df['sentiment'] = model(df.text)
-                print(df)
-                #update_record(server_object, df)
+                if len(df) > 0:
+                        print(datetime.datetime.now(), 'solving '+str(len(df))+' records')        
+                        df['sentiment'] = model(df.text)
+                        print(datetime.datetime.now(), 'updating')
+                        update_record(conn, df)
 
-        else:
-                print(datetime.datetime.now(), 'No data. waiting..')
-                time.sleep(10)
+                else:
+                        print(datetime.datetime.now(), 'No data. waiting..')
+                        time.sleep(10)
 
-        print(datetime.datetime.now(), 'next job..')
+                print(datetime.datetime.now(), 'next job..')
 
 if __name__ == "__main__":
 	main()
