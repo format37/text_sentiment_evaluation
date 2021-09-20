@@ -63,7 +63,7 @@ def main():
                 df = pd.read_sql(query, conn)
 
                 if len(df) > 0:
-                        print(datetime.datetime.now(), 'solving '+str(len(df))+' records')        
+                        print(datetime.datetime.now(), 'solving '+str(len(df))+' records')
                         df['sentiment'] = model(df.text)
                         print(datetime.datetime.now(), 'updating')
                         update_record(conn, df)
